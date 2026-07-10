@@ -7,7 +7,7 @@ A [DDEV](https://ddev.com) addon that adds Prosody IM's [official Docker image](
 From your DDEV project root:
 
 ```bash
-ddev get https://github.com/codementality/ddev-prosody.git
+ddev add-on get codementality/ddev-prosody
 ddev restart
 ```
 
