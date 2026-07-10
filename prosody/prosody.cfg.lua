@@ -1,6 +1,10 @@
 -- Minimal Prosody config for local DDEV development/testing.
 -- Not hardened for production use.
 
+-- Without this, Prosody detaches to the background and the container's
+-- PID 1 exits immediately.
+daemonize = false;
+
 admins = { }
 
 modules_enabled = {
@@ -35,9 +39,12 @@ log = {
 }
 
 http_ports = { 5280 }
-https_ports = { } -- the bundled sample cert isn't readable by the prosody
-                  -- user in this image, so https/wss is disabled for local
-                  -- dev; use ws://.../xmpp-websocket and http://.../http-bind
+https_ports = { 5281 } -- uses the image's bundled self-signed cert for
+                       -- "localhost" (permissions fixed by
+                       -- docker-entrypoint-wrapper.sh); expect a browser/
+                       -- client warning about the untrusted self-signed CA
+certificates = "/etc/prosody/certs"
+https_certificate = "/etc/prosody/certs/localhost.crt"
 
 -- The JID domain your clients will authenticate against. This is
 -- independent of the host/port they connect to (localhost:5222) --
