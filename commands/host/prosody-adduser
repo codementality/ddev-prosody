@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#ddev-generated
+
+## Description: Create an XMPP user account on the Prosody server
+## Usage: prosody-adduser <user> <domain> <password>
+## Example: "ddev prosody-adduser testuser localhost secret123"
+
+set -eu -o pipefail
+
+if [ "$#" -ne 3 ]; then
+  echo "Usage: ddev prosody-adduser <user> <domain> <password>" >&2
+  exit 1
+fi
+
+ddev exec -s prosody prosodyctl register "$1" "$2" "$3"

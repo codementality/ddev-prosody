@@ -1,0 +1,28 @@
+#ddev-generated
+services:
+  prosody:
+    image: prosody/prosody:latest
+    container_name: ddev-${DDEV_SITENAME}-prosody
+    hostname: prosody
+    restart: "no"
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: $DDEV_APPROOT
+    volumes:
+      - "./prosody/prosody.cfg.lua:/etc/prosody/prosody.cfg.lua"
+      - "./prosody/conf.d:/etc/prosody/conf.d"
+      - "prosody_data:/var/lib/prosody"
+    ports:
+      # c2s (client-to-server, what your PHP/xmpp-php client and any XMPP
+      # library will connect to)
+      - "5222:5222"
+      # s2s (server-to-server federation, optional for local dev)
+      - "5269:5269"
+      # BOSH / WebSocket over plain HTTP (no working TLS cert in this
+      # image for the prosody user, see prosody.cfg.lua)
+      - "5280:5280"
+    networks:
+      - default
+
+volumes:
+  prosody_data:

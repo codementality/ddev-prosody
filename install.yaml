@@ -1,0 +1,21 @@
+name: prosody
+ddev_version_constraint: ">=v1.22.0"
+
+pre_install_actions:
+  - |
+    #ddev-nodisplay
+    #ddev-description:Checking Docker Compose compatibility
+    true
+
+project_files:
+  - docker-compose.prosody.yaml
+  - prosody
+  - commands/host/prosody-adduser
+  - commands/host/prosody-logs
+
+global_files: []
+
+post_install_actions:
+  - |
+    #ddev-description:Restart DDEV to start the Prosody service
+    ddev restart

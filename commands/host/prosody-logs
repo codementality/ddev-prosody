@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#ddev-generated
+
+## Description: Tail logs from the Prosody service
+## Usage: prosody-logs [--follow]
+## Example: "ddev prosody-logs --follow"
+
+set -eu -o pipefail
+
+ddev logs -s prosody "$@"
