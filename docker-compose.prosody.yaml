@@ -8,24 +8,31 @@ services:
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}
       com.ddev.approot: $DDEV_APPROOT
-    entrypoint: ["/docker-entrypoint-wrapper.sh"]
-    command: ["prosody"]
     volumes:
       - "./prosody/prosody.cfg.lua:/etc/prosody/prosody.cfg.lua"
       - "./prosody/conf.d:/etc/prosody/conf.d"
-      - "./prosody/docker-entrypoint-wrapper.sh:/docker-entrypoint-wrapper.sh"
       - "prosody_data:/var/lib/prosody"
+    environment:
+      - VIRTUAL_HOST=${DDEV_HOSTNAME}
+      # Read by prosody.cfg.lua to set the JID domain (VirtualHost) to
+      # this project's actual hostname instead of a hardcoded "localhost".
+      - DDEV_HOSTNAME=${DDEV_HOSTNAME}
+      # Router-terminated TLS using DDEV's trusted mkcert wildcard cert, so
+      # BOSH/WebSocket are reachable at the usual DDEV external-service URL
+      # pattern, e.g. https://<project>.ddev.site:5281, with no browser cert
+      # warnings (unlike Prosody's own bundled self-signed cert).
+      - HTTP_EXPOSE=5280:5280
+      - HTTPS_EXPOSE=5281:5280
+    expose:
+      - "5280"
     ports:
       # c2s (client-to-server, what your PHP/xmpp-php client and any XMPP
-      # library will connect to)
+      # library will connect to). Raw TCP, so it bypasses ddev-router and
+      # is published directly.
       - "5222:5222"
-      # s2s (server-to-server federation, optional for local dev)
+      # s2s (server-to-server federation, optional for local dev). Also raw
+      # TCP.
       - "5269:5269"
-      # BOSH / WebSocket over plain HTTP
-      - "5280:5280"
-      # BOSH / WebSocket over HTTPS/WSS (see docker-entrypoint-wrapper.sh
-      # for why the bundled cert needs a permissions fix to be usable)
-      - "5281:5281"
     networks:
       - default
 

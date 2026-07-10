@@ -24,9 +24,9 @@ s2s_require_encryption = false
 s2s_secure_auth = false
 
 -- Without this, Prosody only advertises SCRAM-SHA-1 and refuses PLAIN/
--- DIGEST-MD5 auth over an unencrypted channel. Since TLS isn't usable in
--- this image (see https_ports below) and common PHP XMPP libraries (e.g.
--- xmpp-php) only implement PLAIN/DIGEST-MD5, allow it here for local dev.
+-- DIGEST-MD5 auth over an unencrypted channel. Common PHP XMPP libraries
+-- (e.g. xmpp-php) only implement PLAIN/DIGEST-MD5, so allow it here for
+-- local dev.
 allow_unencrypted_plain_auth = true
 
 authentication = "internal_plain"
@@ -38,18 +38,19 @@ log = {
     info = "*console";
 }
 
+-- BOSH/WebSocket are served here as plain HTTP; ddev-router terminates
+-- TLS in front of this using DDEV's trusted mkcert wildcard cert (see
+-- HTTPS_EXPOSE in docker-compose.prosody.yaml), so no cert is configured
+-- here and https_ports is left empty.
 http_ports = { 5280 }
-https_ports = { 5281 } -- uses the image's bundled self-signed cert for
-                       -- "localhost" (permissions fixed by
-                       -- docker-entrypoint-wrapper.sh); expect a browser/
-                       -- client warning about the untrusted self-signed CA
-certificates = "/etc/prosody/certs"
-https_certificate = "/etc/prosody/certs/localhost.crt"
+https_ports = { }
 
--- The JID domain your clients will authenticate against. This is
--- independent of the host/port they connect to (localhost:5222) --
--- XMPP lets you specify them separately, so "localhost" works fine
--- even though DDEV project URLs use a different hostname.
-VirtualHost "localhost"
+-- The JID domain your clients will authenticate against, e.g.
+-- user@xmpp-dev.ddev.site. Set from the DDEV_HOSTNAME env var (see
+-- docker-compose.prosody.yaml) so it matches this project's actual
+-- hostname; falls back to "localhost" if that's unset. Note the domain
+-- is independent of the network address/port a client dials (5222,
+-- 5281, etc.) -- XMPP lets you specify them separately.
+VirtualHost(os.getenv("DDEV_HOSTNAME") or "localhost")
 
 Include "conf.d/*.cfg.lua"
